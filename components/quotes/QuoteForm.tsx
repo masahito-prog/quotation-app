@@ -129,7 +129,16 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
             router.push("/quotes")
         } catch (error: unknown) {
             console.error(error)
-            const message = error instanceof Error ? error.message : String(error);
+            let message = "";
+            if (error instanceof Error) {
+                message = error.message;
+            } else {
+                try {
+                    message = JSON.stringify(error);
+                } catch {
+                    message = String(error);
+                }
+            }
             alert("保存に失敗しました。Supabaseの環境設定を確認してください。\nエラー: " + message)
         } finally {
             setSaving(false)
