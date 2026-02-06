@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  :root {
+    --background: #f8fafc;
+    --foreground: #0f172a;
+
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+
+    --primary: #2563eb;
+    --primary-foreground: #f8fafc;
+
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #f8fafc;
+
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #2563eb;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
+
+/* Custom Utilities for Stacked Tables */
+@media (max-width: 768px) {
+
+  .mobile-stacked-table table,
+  .mobile-stacked-table thead,
+  .mobile-stacked-table tbody,
+  .mobile-stacked-table th,
+  .mobile-stacked-table td,
+  .mobile-stacked-table tr {
+    display: block;
+  }
+
+  .mobile-stacked-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .mobile-stacked-table tr {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .mobile-stacked-table td {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    padding-left: 35% !important;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    justify-content: flex-end;
+  }
+
+  .mobile-stacked-table td:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-stacked-table td:before {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    width: 30%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-align: left;
+    content: attr(data-label);
+  }
+}
