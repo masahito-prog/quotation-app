@@ -42,6 +42,7 @@ const mapToDb = (quote: Quote) => ({
     total_amount: quote.totalAmount,
     items: quote.items,
     remarks: quote.remarks,
+    user_id: quote.userId, // Include userId in the DB map
     updated_at: new Date().toISOString(),
 });
 

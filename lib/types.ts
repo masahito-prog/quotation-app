@@ -32,6 +32,7 @@ export interface Quote {
 
     // Other
     remarks?: string;
+    userId?: string;
 }
 
 export interface CompanySettings {

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 // Import types and storage
 import { Quote, QuoteItem, QuoteStatus } from "@/lib/types"
 import { saveQuote, generateQuoteNumber } from "@/lib/storage"
+import { supabase } from "@/lib/supabase"
 
 function toISODate(value?: string) {
     if (!value) return null;
@@ -115,6 +116,7 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                 taxAmount,
                 totalAmount,
                 remarks,
+                userId: (await supabase.auth.getUser()).data.user?.id, // Fetch UID here
             }
 
 

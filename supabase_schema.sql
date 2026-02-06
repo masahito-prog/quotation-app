@@ -13,6 +13,7 @@ create table if not exists public.quotes (
   total_amount integer default 0,
   items jsonb default '[]'::jsonb, -- Storing items array as JSONB
   remarks text,
+  user_id uuid references auth.users not null default auth.uid(), -- Link to auth.users
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -21,26 +22,27 @@ create table if not exists public.quotes (
 alter table public.quotes enable row level security;
 
 -- Create policies for public access (No Login feature)
--- Allow Select
-create policy "Allow public read access"
+-- Allow Select (Only own records)
+create policy "Users can read own quotes"
 on public.quotes for select
-to anon
-using (true);
+to authenticated
+using (auth.uid() = user_id);
 
--- Allow Insert
-create policy "Allow public insert access"
+-- Allow Insert (Associate with own UID)
+create policy "Users can insert own quotes"
 on public.quotes for insert
-to anon
-with check (true);
+to authenticated
+with check (auth.uid() = user_id);
 
--- Allow Update
-create policy "Allow public update access"
+-- Allow Update (Only own records)
+create policy "Users can update own quotes"
 on public.quotes for update
-to anon
-using (true);
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
--- Allow Delete
-create policy "Allow public delete access"
+-- Allow Delete (Only own records)
+create policy "Users can delete own quotes"
 on public.quotes for delete
-to anon
-using (true);
+to authenticated
+using (auth.uid() = user_id);
