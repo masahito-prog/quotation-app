@@ -1,24 +1,29 @@
 import { supabase } from "./supabase";
-import { Quote } from "./types";
+import { Quote, CompanySettings } from "./types";
 
 // Helper to convert DB snake_case to App camelCase
-const mapToQuote = (data: any): Quote => ({
-    id: data.id,
-    quoteNumber: data.quote_number,
-    status: data.status,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    customerName: data.customer_name,
-    honorific: data.honorific,
-    issueDate: data.issue_date,
-    expiryDate: data.expiry_date,
-    taxRate: data.tax_rate,
-    subtotal: data.subtotal,
-    taxAmount: data.tax_amount,
-    totalAmount: data.total_amount,
-    items: data.items || [], // JSONB comes back as object/array
-    remarks: data.remarks,
-});
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mapToQuote = (data: any): Quote => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const d = data as Record<string, any>;
+    return {
+        id: d.id,
+        quoteNumber: d.quote_number,
+        status: d.status,
+        createdAt: d.created_at,
+        updatedAt: d.updated_at,
+        customerName: d.customer_name,
+        honorific: d.honorific,
+        issueDate: d.issue_date,
+        expiryDate: d.expiry_date,
+        taxRate: d.tax_rate,
+        subtotal: d.subtotal,
+        taxAmount: d.tax_amount,
+        totalAmount: d.total_amount,
+        items: d.items || [],
+        remarks: d.remarks,
+    };
+};
 
 // Helper to convert App camelCase to DB snake_case
 const mapToDb = (quote: Quote) => ({
@@ -70,26 +75,19 @@ export const getQuote = async (id: string): Promise<Quote | undefined> => {
 };
 
 export const saveQuote = async (quote: Quote): Promise<void> => {
-    // Check if exists/Update or Insert
-    // For simplicity, we can use upsert if ID is provided.
-    // If ID is empty string or temporary ID, we should handle it carefully.
-
-    // In our app, we generate ID on client for LocalStorage. 
-    // For Supabase, best to let DB generate UUID or use valid UUIDs.
     // If quote.id is not a valid UUID, Supabase will error.
-    // If it's a new quote, quote.id might be a timestamp-based ID from previous logic which is NOT UUID.
-    // We should strip ID if it's not a UUID to let Supabase generate one, OR generate UUID client side.
+    // We should strip ID if it's not a UUID to let Supabase generate one.
+    const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
     const dbData = mapToDb(quote);
 
-    // If id looks like a short string (from previous generateId), delete it to let DB gen UUID
-    if (quote.id && quote.id.length < 20) {
-        delete dbData.id;
+    if (!quote.id || !isUuid(quote.id)) {
+        delete (dbData as { id?: string }).id;
     }
 
     const { error } = await supabase
         .from("quotes")
-        .upsert(dbData, { onConflict: 'id' })
+        .upsert(dbData)
         .select();
 
     if (error) {
@@ -107,16 +105,40 @@ export const deleteQuote = async (id: string): Promise<void> => {
     }
 };
 
+// Settings (Using LocalStorage for now as there's no DB table for it yet)
+const SETTINGS_KEY = "quotation_app_settings";
+
+export const getSettings = (): CompanySettings => {
+    if (typeof window === "undefined") return {
+        companyName: "株式会社サンプル",
+        address: "東京都渋谷区渋谷1-2-3 サンプルビル 5F",
+        zipCode: "150-0002",
+        tel: "03-1234-5678",
+        email: "info@sample.co.jp",
+        registrationNumber: "T1234567890123",
+    };
+    const data = localStorage.getItem(SETTINGS_KEY);
+    return data ? JSON.parse(data) : {
+        companyName: "株式会社サンプル",
+        address: "東京都渋谷区渋谷1-2-3 サンプルビル 5F",
+        zipCode: "150-0002",
+        tel: "03-1234-5678",
+        email: "info@sample.co.jp",
+        registrationNumber: "T1234567890123",
+    };
+};
+
+export const saveSettings = (settings: CompanySettings): void => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+};
+
 export const generateQuoteNumber = (): string => {
     const prefix = "QUO";
     const year = new Date().getFullYear();
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const random = Math.floor(Math.random() * 100000).toString().padStart(6, '0');
     return `${prefix}-${year}-${random}`;
 }
 
-// Generate UUID for client-side usage if needed (using crypto.randomUUID if available or library)
 export const generateId = (): string => {
-    // Return empty or valid UUID. For now return empty string to let DB handle it on Insert.
-    // Or if editing, we preserve the ID.
     return "";
 };

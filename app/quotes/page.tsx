@@ -19,8 +19,9 @@ export default function QuotesPage() {
         try {
             const data = await getQuotes()
             setQuotes(data)
-        } catch (err: any) {
-            setError(err.message || "読み込みに失敗しました")
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "読み込みに失敗しました";
+            setError(message)
         } finally {
             setLoading(false)
         }
@@ -35,7 +36,7 @@ export default function QuotesPage() {
             try {
                 await deleteQuote(id)
                 await loadQuotes()
-            } catch (err) {
+            } catch {
                 alert("削除に失敗しました")
             }
         }

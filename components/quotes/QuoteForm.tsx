@@ -40,7 +40,7 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
     const router = useRouter()
 
     // State
-    const [id, setId] = useState<string>(initialData?.id || "")
+    const [id] = useState<string>(initialData?.id || "")
     const [quoteNumber, setQuoteNumber] = useState<string>(initialData?.quoteNumber || "")
 
     const [customerName, setCustomerName] = useState(initialData?.customerName || "")
@@ -52,8 +52,9 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
     ])
     const [taxRate, setTaxRate] = useState(initialData?.taxRate ?? 10)
     const [showPreview, setShowPreview] = useState(false)
-    const [isMobile, setIsMobile] = useState(false)
+    const [, setIsMobile] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [remarks, setRemarks] = useState(initialData?.remarks || "")
 
     // Initialize date & resize listener
     useEffect(() => {
@@ -113,7 +114,7 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                 subtotal,
                 taxAmount,
                 totalAmount,
-                remarks: "",
+                remarks,
             }
 
 
@@ -126,9 +127,10 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
             }
 
             router.push("/quotes")
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error)
-            alert("保存に失敗しました。Supabaseの環境設定を確認してください。\nエラー: " + (error.message || error))
+            const message = error instanceof Error ? error.message : String(error);
+            alert("保存に失敗しました。Supabaseの環境設定を確認してください。\nエラー: " + message)
         } finally {
             setSaving(false)
         }
@@ -198,8 +200,11 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                     <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="space-y-2">
                             <Label>発行日</Label>
-                            <Input value={issueDate} readOnly className="bg-muted cursor-not-allowed" />
-                            <p className="text-xs text-muted-foreground">※ 自動設定されます</p>
+                            <Input
+                                type="date"
+                                value={toISODate(issueDate) || issueDate}
+                                onChange={(e) => setIssueDate(e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>有効期限</Label>
@@ -324,7 +329,11 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                     <h2 className="text-lg font-semibold mb-4">備考・条件</h2>
                     <div className="space-y-2">
                         <Label>備考</Label>
-                        <Input placeholder="備考を入力してください" />
+                        <Input
+                            placeholder="備考を入力してください"
+                            value={remarks}
+                            onChange={(e) => setRemarks(e.target.value)}
+                        />
                     </div>
                 </Card>
 
@@ -384,6 +393,9 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                             taxRate={taxRate}
                             taxAmount={taxAmount}
                             totalAmount={totalAmount}
+                            quoteNumber={quoteNumber}
+                            issueDate={issueDate}
+                            remarks={remarks}
                         />
                     </div>
 

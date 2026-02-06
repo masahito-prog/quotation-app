@@ -33,3 +33,12 @@ export interface Quote {
     // Other
     remarks?: string;
 }
+
+export interface CompanySettings {
+    companyName: string;
+    address: string;
+    zipCode: string;
+    tel: string;
+    email: string;
+    registrationNumber: string;
+}

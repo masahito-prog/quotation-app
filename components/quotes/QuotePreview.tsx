@@ -1,5 +1,4 @@
 import React from "react";
-import { cn } from "@/lib/utils";
 
 export interface QuoteItem {
     id: string;
@@ -17,8 +16,13 @@ interface QuotePreviewProps {
     taxRate: number;
     taxAmount: number;
     totalAmount: number;
+    quoteNumber?: string;
+    issueDate?: string;
+    remarks?: string;
     isMobile?: boolean;
 }
+
+import { getSettings } from "@/lib/storage";
 
 export function QuotePreview({
     customerName,
@@ -28,8 +32,16 @@ export function QuotePreview({
     taxRate,
     taxAmount,
     totalAmount,
+    quoteNumber,
+    issueDate,
+    remarks,
 }: QuotePreviewProps) {
-    const currentDate = new Date().toLocaleDateString("ja-JP", {
+    const settings = getSettings();
+    const formattedDate = issueDate ? new Date(issueDate).toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    }) : new Date().toLocaleDateString("ja-JP", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -60,8 +72,8 @@ export function QuotePreview({
                 {/* Right: Company Info */}
                 <div className="w-full md:w-2/5 mt-8 md:mt-0 text-right md:text-left md:pl-8 text-sm text-gray-700">
                     <div className="mb-2">
-                        <p>見積No. QUO-2026-000001</p>
-                        <p>発行日: {currentDate}</p>
+                        <p>見積No. {quoteNumber || "QUO-YYYY-XXXXXX"}</p>
+                        <p>発行日: {formattedDate}</p>
                     </div>
 
                     <div className="space-y-1 relative pt-2">
@@ -70,13 +82,12 @@ export function QuotePreview({
                             (印)
                         </div>
 
-                        <p className="font-bold text-base text-gray-900">株式会社サンプル</p>
-                        <p>〒150-0002</p>
-                        <p>東京都渋谷区渋谷1-2-3</p>
-                        <p>サンプルビル 5F</p>
-                        <p>TEL: 03-1234-5678</p>
-                        <p>Email: info@sample.co.jp</p>
-                        <p>登録番号: T1234567890123</p>
+                        <p className="font-bold text-base text-gray-900">{settings.companyName}</p>
+                        <p>〒{settings.zipCode}</p>
+                        <p>{settings.address}</p>
+                        <p>TEL: {settings.tel}</p>
+                        <p>Email: {settings.email}</p>
+                        <p>登録番号: {settings.registrationNumber}</p>
                     </div>
                 </div>
             </div>
@@ -147,9 +158,13 @@ export function QuotePreview({
             <div className="border-t border-gray-200 pt-4 text-sm text-gray-600">
                 <h4 className="font-bold text-gray-800 mb-2">備考</h4>
                 <p className="whitespace-pre-wrap leading-relaxed">
-                    ・本見積書の有効期限は発行日より2週間とさせていただきます。<br />
-                    ・お支払いは月末締め翌月末払いにてお願いいたします。<br />
-                    ・ご不明な点がございましたら担当までご連絡ください。
+                    {remarks || (
+                        <>
+                            ・本見積書の有効期限は発行日より2週間とさせていただきます。<br />
+                            ・お支払いは月末締め翌月末払いにてお願いいたします。<br />
+                            ・ご不明な点がございましたら担当までご連絡ください。
+                        </>
+                    )}
                 </p>
             </div>
         </div>
