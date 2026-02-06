@@ -14,6 +14,24 @@ import { cn } from "@/lib/utils"
 import { Quote, QuoteItem, QuoteStatus } from "@/lib/types"
 import { saveQuote, generateQuoteNumber } from "@/lib/storage"
 
+function toISODate(value?: string) {
+    if (!value) return null;
+
+    // すでに YYYY-MM-DD ならそのまま
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+    // "2026年2月6日" → "2026-02-06"
+    const m = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+    if (m) {
+        const y = m[1];
+        const mm = String(m[2]).padStart(2, "0");
+        const dd = String(m[3]).padStart(2, "0");
+        return `${y}-${mm}-${dd}`;
+    }
+
+    return null;
+}
+
 interface QuoteFormProps {
     initialData?: Quote
 }
@@ -41,7 +59,8 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
     useEffect(() => {
         if (!initialData) {
             const today = new Date()
-            setIssueDate(today.toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" }))
+            setIssueDate(today.toISOString().split("T")[0])
+
 
             // Set default expiry (2 weeks)
             const expiry = new Date()
@@ -84,15 +103,19 @@ export function QuoteForm({ initialData }: QuoteFormProps) {
                 updatedAt: new Date().toISOString(),
                 customerName,
                 honorific,
-                issueDate,
-                expiryDate,
+
+                // ★ここを差し替え
+                issueDate: toISODate(issueDate) || "",
+                expiryDate: toISODate(expiryDate) || "",
+
                 items,
                 taxRate,
                 subtotal,
                 taxAmount,
                 totalAmount,
-                remarks: "", // Add remarks state if needed
+                remarks: "",
             }
+
 
             await saveQuote(quoteData)
 
